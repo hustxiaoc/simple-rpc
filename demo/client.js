@@ -7,7 +7,7 @@ const queue = [];
 const requestQueue = new Map();
 
 function start(ready) {
-    const client = new Client({host:'127.0.0.1',port: 8888});
+    const client = new Client();
 
     function send() {
         rid++;
@@ -21,18 +21,11 @@ function start(ready) {
             args:args.slice(1,-1)
         };
 
-        const ret = client.send(req);
         requestQueue.set(rid,Object.assign({
-            callback: callback,
-            timer: setTimeout(()=> {
-                callback(new Error('timeout'));
-                requestQueue.delete(rid);
-            }, 3000)
+            callback: callback
         }, req));
 
-        if (!ret) {
-            console.log(ret);
-        }
+        client.send(req);
     }
 
     client.on('message', function(message){
@@ -55,29 +48,11 @@ function start(ready) {
 }
 
 start((service)=> {
+    service.add(1,2,3,4,5, function(err, result) {
+        console.log(`1+2+3+4+5 = ${result}`);
+    });
 
-    const count = 8000;
-    let success = 0;
-    let error = 0;
-    const start = Date.now();
-    const args = [];
-    for(let i=0;i<1000;i++) {
-        args.push(i);
-    }
-    for(let i =0 ;i<count;i++) {
-        service.add.apply(service, args.concat(function(err, result) {
-            if (err) {
-                error++;
-            } else {
-                success++;
-            }
-
-            if(count === error + success) {
-                console.log(result);
-                console.log(`success :${success}\n error :${error}`);
-                process.exit(0);
-            }
-        }));
-    }
-    console.log(Date.now()-start);
+    service.time(1,2,3,4,5, function(err, result) {
+        console.log(`1*2*3*4*5 = ${result}`);
+    });
 });

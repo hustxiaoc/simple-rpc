@@ -1,7 +1,7 @@
 'use strict';
 const Server = require('../lib/server');
 const server = new Server();
-server.listen(8888);
+server.listen();
 
 const service = {
     add() {
